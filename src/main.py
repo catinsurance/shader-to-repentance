@@ -5,6 +5,7 @@ from pathlib import Path
 
 from tkinter import messagebox
 from tkinter import filedialog
+from tkinter import simpledialog
 import tkinter.font as tkFont
 import webbrowser
 
@@ -19,6 +20,7 @@ fragmentShader = None
 paramsWindowOpen = False
 parameters = [] # List of lists, index 0 is the name, index 1 is the type
 windowsToDestroy = [] # Windows to destroy when the main window is closed
+lastShaderName = "" # The last shader name that was used
 
 # Main window
 window = tk.Tk()
@@ -32,11 +34,11 @@ def getFile(fileType, message):
 
 def storeVertexShader():
     global vertexShader
-    vertexShader = getFile([("Vertex Shader", "*.vs")], "vertex")
+    vertexShader = getFile([("Vertex Shader", "*.glsl")], "vertex")
 
 def storeFragmentShader():
     global fragmentShader
-    fragmentShader = getFile([("Fragment Shader", "*.fs")], "fragment")
+    fragmentShader = getFile([("Fragment Shader", "*.glsl")], "fragment")
 
 
 def writeToFile():
@@ -56,16 +58,19 @@ def writeToFile():
         messagebox.showerror("Error", "Fragment shader file does not exist")
         return
 
-    if Path(fragmentShader).stem != Path(vertexShader).stem:
-        messagebox.showerror("Error", "Fragment shader and vertex shader should have the same file name!")
+    global lastShaderName
+    answer = simpledialog.askstring("What is the name of your shader?", "Enter the name of your shader", initialvalue=lastShaderName)
+    if answer is None:
         return
+
+    lastShaderName = answer
 
     saveFile = filedialog.asksaveasfilename(confirmoverwrite=True, defaultextension=".xml", filetypes=[("XML File", "*.xml")], title="Save XML File")
 
     # Okay, now we can write to the file
     root = ET.Element("shaders")
     shader = ET.SubElement(root, "shader")
-    shader.set("name", Path(fragmentShader).stem)
+    shader.set("name", lastShaderName)
 
     # Handle paramters (WIP)
     parameterElement = ET.SubElement(shader, "parameters")
