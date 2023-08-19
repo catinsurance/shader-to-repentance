@@ -40,6 +40,30 @@ def storeFragmentShader():
     global fragmentShader
     fragmentShader = getFile([("Fragment Shader", "*.glsl")], "fragment")
 
+def buildShader(root):
+    shader = ET.SubElement(root, "shader")
+    shader.set("name", lastShaderName)
+
+    # Handle paramters (WIP)
+    parameterElement = ET.SubElement(shader, "parameters")
+    for paramaterData in parameters:
+        param = ET.SubElement(parameterElement, "param")
+        param.set("name", paramaterData[0].get())
+        param.set("type", paramaterData[1].get())
+
+    # Handle vertex shader
+    vertexFile = open(vertexShader, "r")
+    vertex = ET.SubElement(shader, "vertex")
+    vertex.text = ET.CDATA("\n" + vertexFile.read() + "\n")
+
+    vertexFile.close()
+
+    # Handle fragment shader
+    fragmentFile = open(fragmentShader, "r")
+    fragment = ET.SubElement(shader, "fragment")
+    fragment.text = ET.CDATA("\n" + fragmentFile.read() + "\n")
+
+    fragmentFile.close()
 
 def writeToFile():
     if vertexShader is None:
@@ -67,31 +91,27 @@ def writeToFile():
 
     saveFile = filedialog.asksaveasfilename(confirmoverwrite=True, defaultextension=".xml", filetypes=[("XML File", "*.xml")], title="Save XML File")
 
-    # Okay, now we can write to the file
-    root = ET.Element("shaders")
-    shader = ET.SubElement(root, "shader")
-    shader.set("name", lastShaderName)
+    # If the file exists, append to it
+    if os.path.exists(saveFile) is True:
+        parser = ET.XMLParser(strip_cdata=False)
+        root = ET.parse(saveFile, parser).getroot()
 
-    # Handle paramters (WIP)
-    parameterElement = ET.SubElement(shader, "parameters")
-    for paramaterData in parameters:
-        param = ET.SubElement(parameterElement, "param")
-        param.set("name", paramaterData[0].get())
-        param.set("type", paramaterData[1].get())
+        if root.tag != "shaders":
+            messagebox.showerror("Error", "Invalid shaders.xml file")
+            return
 
-    # Handle vertex shader
-    vertexFile = open(vertexShader, "r")
-    vertex = ET.SubElement(shader, "vertex")
-    vertex.text = ET.CDATA("\n" + vertexFile.read() + "\n")
+        # Check if the shader already exists
+        for shader in root:
+            if shader.get("name") == lastShaderName:
+                # Overwrite the shader
+                root.remove(shader)
+                break
 
-    vertexFile.close()
-
-    # Handle fragment shader
-    fragmentFile = open(fragmentShader, "r")
-    fragment = ET.SubElement(shader, "fragment")
-    fragment.text = ET.CDATA("\n" + fragmentFile.read() + "\n")
-
-    fragmentFile.close()
+        buildShader(root)
+    else:
+        # Else, create a new file
+        root = ET.Element("shaders")
+        buildShader(root)
 
     # Write to the file
     tree = ET.ElementTree(root)
