@@ -22,10 +22,13 @@ parameters = [] # List of lists, index 0 is the name, index 1 is the type
 windowsToDestroy = [] # Windows to destroy when the main window is closed
 lastShaderName = "" # The last shader name that was used
 
+lastParamsWindowX = 0
+lastParamsWindowY = 0
+
 # Main window
 window = tk.Tk()
-window.minsize(WINDOW_SIZE, WINDOW_SIZE)
-window.maxsize(WINDOW_SIZE, WINDOW_SIZE)
+window.geometry(f"{WINDOW_SIZE}x{WINDOW_SIZE}")
+window.resizable(False, False)
 window.configure(background="#d1d1d1")
 window.title("Repentance Shader to XML Converter")
 
@@ -83,7 +86,7 @@ def writeToFile():
         return
 
     global lastShaderName
-    answer = simpledialog.askstring("What is the name of your shader?", "Enter the name of your shader", initialvalue=lastShaderName)
+    answer = simpledialog.askstring("What is the name of your shader?", "Enter the name of your shader", initialvalue=lastShaderName, parent=window)
     if answer is None:
         return
 
@@ -117,8 +120,6 @@ def writeToFile():
     tree = ET.ElementTree(root)
     ET.indent(tree, space="\t", level=0)
     tree.write(saveFile)
-
-    messagebox.showinfo("Success", "Successfully converted shader to XML!")
 
 def addParameterEntry(owner, button):
     parameters.append([tk.StringVar(), tk.StringVar()]) # Add a new parameter to the list
@@ -170,8 +171,13 @@ def addParameterFrame(owner, paramSlot, paramAddButton):
 
 def toggleParamsWindowState(paramWindow):
     global paramsWindowOpen
+    global lastParamsWindowX
+    global lastParamsWindowY
+
     paramsWindowOpen = False
     windowsToDestroy.remove(paramWindow)
+    lastParamsWindowX = paramWindow.winfo_x()
+    lastParamsWindowY = paramWindow.winfo_y()
     paramWindow.destroy()
 
 def closeMainWindow():
@@ -188,8 +194,8 @@ def parameterWindow():
         return
 
     paramWindow = tk.Toplevel()
-    paramWindow.minsize(PARAM_WINDOW_X, PARAM_WINDOW_Y)
-    paramWindow.maxsize(PARAM_WINDOW_X, PARAM_WINDOW_Y)
+    paramWindow.geometry(f"{PARAM_WINDOW_X}x{PARAM_WINDOW_Y}+{lastParamsWindowX}+{lastParamsWindowY}")
+    paramWindow.resizable(False, False)
     paramWindow.title("Parameter Editor")
     paramWindow.protocol("WM_DELETE_WINDOW", lambda : toggleParamsWindowState(paramWindow))
 
@@ -283,5 +289,11 @@ def __main__():
 
     window.protocol("WM_DELETE_WINDOW", lambda : closeMainWindow())
     window.mainloop()
+
+    global lastParamsWindowX
+    global lastParamsWindowY
+
+    lastParamsWindowX = window.winfo_x()
+    lastParamsWindowY = window.winfo_y()
 
 __main__()
