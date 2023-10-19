@@ -57,14 +57,14 @@ def buildShader(root):
     # Handle vertex shader
     vertexFile = open(vertexShader, "r")
     vertex = ET.SubElement(shader, "vertex")
-    vertex.text = ET.CDATA("\n" + vertexFile.read() + "\n")
+    vertex.text = ET.CDATA(vertexFile.read() + "\n")
 
     vertexFile.close()
 
     # Handle fragment shader
     fragmentFile = open(fragmentShader, "r")
     fragment = ET.SubElement(shader, "fragment")
-    fragment.text = ET.CDATA("\n" + fragmentFile.read() + "\n")
+    fragment.text = ET.CDATA(fragmentFile.read() + "\n")
 
     fragmentFile.close()
 
