@@ -11,7 +11,7 @@ import webbrowser
 
 WINDOW_SIZE = 512
 PARAM_WINDOW_X = 256
-PARAM_WINDOW_Y = 512
+PARAM_WINDOW_Y = 780
 GRID_BUTTON_SIZE_DIV = 5
 
 # Variables
@@ -128,7 +128,7 @@ def addParameterEntry(owner, button):
     parameters[slot][1].set("float")
     addParameterFrame(owner, slot, button)
 
-    if parameters.__len__() == 7:
+    if parameters.__len__() == 14:
         button.config(state="disabled")
 
 def deleteParameterFrame(index, frame, paramAddButton):
